@@ -15,3 +15,5 @@ In the absence of [default](https://en.wikipedia.org/wiki/Default_(finance)), th
 There are two main approaches to model credit risk, that is estimate the survival probabilty over time:
 * The reduced-form approach, which focuses on modeling default probabilities as stochastic processes
 * The structural approach in which bankruptcy is modeled from the firm’s asset value. The approch is also known as firm value model or [Merton model](https://en.wikipedia.org/wiki/Merton_model)
+
+Here we only look at the first approach and assumes for sake of simplicity that both credit spread and interest are constant over time, in which case the reduced-form model gives closed form formula, which can easily be vectorized in python using numpy.
