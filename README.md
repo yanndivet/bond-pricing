@@ -7,8 +7,8 @@ The main characteristics of a bond are its maturity date and its coupon. As a fi
 
 #### Bond valuation
 As often in finance the valuation of bond comes down to discounting future cash flows. The actual discounting requires an interest rate that we'll assume to be constant for simplicity. The cash flows depend on two credit parameters: 
-* the default probability 
-* and the recovery rate. 
+* [the probability of default](https://en.wikipedia.org/wiki/Probability_of_default) 
+* and the recovery rate, sometimes also referred to as [Loss Given Default (LGD)](https://en.wikipedia.org/wiki/Loss_given_default) 
 
 In the absence of default, the issuer will pay coupons on a regular basis and pay back the notional on maturity date. In case of the default, the holder will receive recovery rate times the face value of the bond only. The default probability at time t depends on t and the default intensity spread divided by (1 - recovery)
 
