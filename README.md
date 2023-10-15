@@ -13,7 +13,7 @@ As often in finance the valuation of bond comes down to discounting future cash 
 In the absence of [default](https://en.wikipedia.org/wiki/Default_(finance)), the issuer will pay coupons on a regular basis and pay back the notional on maturity date. In case of the default, the holder will receive recovery rate times the face value of the bond only. The default probability at time t depends on t and the default intensity spread divided by (1 - recovery)
 
 There are two main approaches to model credit risk, that is estimate the survival probabilty over time:
-* The reduced-form approach, which focuses on modeling default probabilities as stochastic processes
+* The [reduced-form approach](https://en.wikipedia.org/wiki/Jarrow%E2%80%93Turnbull_model), which focuses on modeling default probabilities as stochastic processes
 * The structural approach in which bankruptcy is modeled from the firm’s asset value. The approch is also known as firm value model or [Merton model](https://en.wikipedia.org/wiki/Merton_model)
 
 Here we only look at the first approach and assumes for sake of simplicity that both credit spread and interest are constant over time, in which case the reduced-form model gives closed form formula, which can easily be vectorized in python using numpy.
