@@ -24,10 +24,11 @@ def bond_cr01(maturity: np.array,
                coupon:np.array,
                interest_rate:np.array,
                spread: np.array,
-               recovery_rate:np.array) -> np.array:
+               recovery_rate:np.array,
+               delta:bool=True) -> np.array:
     """
     vectorized function to compute the price sensitivity of a bond for a bump of 1 basis point of the credit spread
-    returns an array of CR01 in absolute term
+    returns an array of CR01 in absolute term if delta is True, else returns an array of CR_gamma instead
     returns nan if sum of interest rate and default intensity is null
     """
     spread_bump = 1e-4
@@ -36,17 +37,22 @@ def bond_cr01(maturity: np.array,
 
     price_plus_1_basis_point = bond_price(maturity, coupon, interest_rate, spread_plus_1_basis_point, recovery_rate)
     price_minus_1_basis_point = bond_price(maturity, coupon, interest_rate, spread_minus_1_basis_point, recovery_rate)
-    return (price_plus_1_basis_point - price_minus_1_basis_point) / 2 / spread_bump / 1e2
+    if delta:
+        return (price_plus_1_basis_point - price_minus_1_basis_point) / 2 / spread_bump / 1e2
+    else:
+        price = bond_price(maturity, coupon, interest_rate, spread, recovery_rate)
+        return (price_plus_1_basis_point + price_minus_1_basis_point - 2 * price) /  np.square(spread_bump) / 1e4
 
 
 def bond_ir01(maturity: np.array,
                coupon:np.array,
                interest_rate:np.array,
                spread: np.array,
-               recovery_rate:np.array) -> np.array:
+               recovery_rate:np.array,
+               delta:bool=True) -> np.array:
     """
     vectorized function to compute the price sensitivity of a bond for a bump of 1 basis point of the interest rate
-    returns an array or IR01 in absolute term
+    returns an array or IR01 in absolute term if delta is True, else returns an array of IR_gamma instead
     returns nan if sum of spread and default intensity is null
     """
     ir_bump = 1e-4
@@ -56,7 +62,12 @@ def bond_ir01(maturity: np.array,
     price = bond_price(maturity, coupon, interest_rate, spread, recovery_rate)
     price_plus_1_basis_point = bond_price(maturity, coupon, ir_plus_1_basis_point, spread, recovery_rate)
     price_minus_1_basis_point = bond_price(maturity, coupon, ir_minus_1_basis_point, spread, recovery_rate)
-    return (price_plus_1_basis_point - price_minus_1_basis_point) / 2 / ir_bump / 1e2
+    if delta:
+        return (price_plus_1_basis_point - price_minus_1_basis_point) / 2 / ir_bump / 1e2
+    else:
+        price = bond_price(maturity, coupon, interest_rate, spread, recovery_rate)
+        return (price_plus_1_basis_point + price_minus_1_basis_point - 2 * price) /  np.square(ir_bump) / 1e4
+
 
 def bond_spread(maturity: np.array,
                coupon:np.array,
