@@ -6,7 +6,7 @@
 The main characteristics of a bond are its maturity date and its coupon. As a first order approximation, we can ignore coupon frequency and day count convention which only have second order effects.
 
 #### Bond valuation
-As often in finance the valuation of bond comes down to discounting future cash flows. The actual discounting requires an interest rate that we'll assume to be constant for simplicity. The cash flows depend on two credit parameters: 
+As often in finance the valuation of bond comes down to discounting future cash flows. The actual discounting requires an interest rate that we'll assume to be constant for simplicity. The cash flows depend on two [credit](https://en.wikipedia.org/wiki/Credit) parameters: 
 * [the probability of default](https://en.wikipedia.org/wiki/Probability_of_default) 
 * and the recovery rate, sometimes also referred to as [Loss Given Default (LGD)](https://en.wikipedia.org/wiki/Loss_given_default) 
 
