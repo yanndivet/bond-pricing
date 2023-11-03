@@ -1,5 +1,46 @@
 import numpy as np
 
+def continuous_to_discrete(r: np.array, n = np.array) -> np.array:
+    r_over_n = np.divide(r, n)
+    return np.multiply(n, np.expm1(r_over_n))
+
+def discrete_to_continuous(r: np.array, n = np.array) -> np.array:
+    r_over_n = np.divide(r, n)
+    return np.multiply(n, np.log1p(r_over_n))
+
+def bond_price_from_yield(t:np.array, ytm:np.array, c:np.array, freq:np.array) -> np.array:
+    """
+    
+    Parameters
+    ----------
+    t : np.array
+        year to maturity.
+    ytm : np.array
+        yield to maturity.
+    c : np.array
+        yearly coupon rate in absolute term (5% -> 0.05).
+    freq : np.array
+        number of coupon per year.
+
+    Returns
+    -------
+    return clean price in percent, yieldDelta (DV01) in percent
+
+    """
+    freq_t = np.multiply(t, freq)
+    ytm_on_freq = np.divide(ytm, freq)
+    coupon_on_freq = np.divide(c, freq)
+    coupon_on_yield = coupon_on_freq/ytm_on_freq
+    aux = np.power(1+ytm_on_freq, -freq_t)
+    coupon_on_yield_one_minus_aux = coupon_on_yield*(1-aux)
+    price = 100*(aux +coupon_on_yield_one_minus_aux)
+    delta_aux = -np.multiply(t, aux) / (1+ytm_on_freq)
+    gamma_aux = np.multiply(t, aux) * np.divide(1+freq_t, freq) / np.square((1+ytm_on_freq))
+    yieldDelta = (delta_aux*(1-coupon_on_yield)-np.divide(coupon_on_yield_one_minus_aux, ytm))
+    yieldGamma = 0.01*(gamma_aux * (1-coupon_on_yield) + 2 * delta_aux * np.divide(coupon_on_yield, ytm) + 2 * np.divide(coupon_on_yield_one_minus_aux, np.square(ytm)))
+    
+    return price, yieldDelta, yieldGamma
+
 def bond_price(maturity: np.array,
                coupon:np.array,
                interest_rate:np.array,
