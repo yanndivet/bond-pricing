@@ -14,6 +14,7 @@ def discrete_to_continuous(r: np.array, n = np.array) -> np.array:
     r_over_n = np.divide(r, n)
     return np.multiply(n, np.log1p(r_over_n))
 
+# Next 2 functions use yield to value bond and vice versa
 def bond_price_from_yield(t:np.array, ytm:np.array, c:np.array, freq:np.array) -> np.array:
     """
     Parameters
@@ -29,7 +30,7 @@ def bond_price_from_yield(t:np.array, ytm:np.array, c:np.array, freq:np.array) -
 
     Returns
     -------
-    return 3 np.arrays: clean price in percent (par -> 100), yieldDelta (DV01) in percent, yieldGamma
+    return 3 np.arrays: dirty price in percent (par -> 100), yieldDelta (DV01) in percent, yieldGamma
     vectorized function
     """
     freq_t = np.multiply(t, freq)
@@ -58,7 +59,7 @@ def bond_yield_from_price(maturity:np.array,
     maturity : np.array
         year to maturity.
     price : np.array
-        (clean) price of the bond (par -> 100).
+        (dirty) price of the bond (par -> 100).
     coupon : np.array
         yearly coupon rate in absolute term (5% -> 0.05).
     freq : np.array
@@ -82,6 +83,7 @@ def bond_yield_from_price(maturity:np.array,
         counter += 1
     return yield_guess
 
+# Next function use interest rate, credit spread and recovery rate to value risky / defaultable bonds using hazard rate model
 def bond_price(maturity: np.array,
                coupon:np.array,
                interest_rate:np.array,
