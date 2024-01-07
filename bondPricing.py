@@ -1,22 +1,27 @@
 import numpy as np
 
 def continuous_to_discrete(r: np.array, n = np.array) -> np.array:
+    """
+    vectorized function to convert a continuous rate to a discrete rate, with frequency n
+    """
     r_over_n = np.divide(r, n)
     return np.multiply(n, np.expm1(r_over_n))
 
 def discrete_to_continuous(r: np.array, n = np.array) -> np.array:
+    """
+    vectorized function to convert a discrete rate, with frequency n to a continuous rate
+    """
     r_over_n = np.divide(r, n)
     return np.multiply(n, np.log1p(r_over_n))
 
 def bond_price_from_yield(t:np.array, ytm:np.array, c:np.array, freq:np.array) -> np.array:
     """
-    
     Parameters
     ----------
     t : np.array
         year to maturity.
     ytm : np.array
-        yield to maturity.
+        yield to maturity in absolute term (5% -> 0.05).
     c : np.array
         yearly coupon rate in absolute term (5% -> 0.05).
     freq : np.array
@@ -24,8 +29,8 @@ def bond_price_from_yield(t:np.array, ytm:np.array, c:np.array, freq:np.array) -
 
     Returns
     -------
-    return clean price in percent, yieldDelta (DV01) in percent
-
+    return 3 np.arrays: clean price in percent (par -> 100), yieldDelta (DV01) in percent, yieldGamma
+    vectorized function
     """
     freq_t = np.multiply(t, freq)
     ytm_on_freq = np.divide(ytm, freq)
@@ -40,6 +45,42 @@ def bond_price_from_yield(t:np.array, ytm:np.array, c:np.array, freq:np.array) -
     yieldGamma = 0.01*(gamma_aux * (1-coupon_on_yield) + 2 * delta_aux * np.divide(coupon_on_yield, ytm) + 2 * np.divide(coupon_on_yield_one_minus_aux, np.square(ytm)))
     
     return price, yieldDelta, yieldGamma
+
+
+def bond_yield_from_price(maturity:np.array,
+                          price:np.array,
+                          coupon:np.array,
+                          freq:np.array,
+                          max_number_of_loop:int = 15) -> np.array:
+    """
+    Parameters
+    ----------
+    maturity : np.array
+        year to maturity.
+    price : np.array
+        (clean) price of the bond (par -> 100).
+    coupon : np.array
+        yearly coupon rate in absolute term (5% -> 0.05).
+    freq : np.array
+        number of coupon per year.
+    max_number_of_loop : int
+        maximum number of loops to perform in the Newton-Raphson method
+
+    Returns
+    -------
+    return np.array of yield in aboslute term (5% -> 0.05)
+    vectorized function
+    """
+    # makes a first estimate of the yield of the bond using bond price, years to maturity and coupon, then substract interest rate to get spread
+    yield_guess = np.divide(np.add(coupon, np.divide(np.subtract(100,price), maturity)/100), np.add(price, 100)/2)*100
+    price_theoretical, delta, _ =  bond_price_from_yield(maturity, yield_guess, coupon, freq)
+    counter = 0
+    # from starting yield, iterate the calculation of the spread using a Newton-Raphson method on the bond price
+    while counter < max_number_of_loop and np.max(np.abs(np.subtract(price_theoretical, price))) > 1e-6:
+        yield_guess = yield_guess + np.divide(np.subtract(price, price_theoretical), delta) / 100
+        price_theoretical, delta, _ = bond_price_from_yield(maturity, yield_guess, coupon, freq)
+        counter += 1
+    return yield_guess
 
 def bond_price(maturity: np.array,
                coupon:np.array,
@@ -121,13 +162,13 @@ def bond_spread(maturity: np.array,
     returns an array of spread in absolute value
 
     """
-    # first ensure recovery ate is positive and at least 10% below the bond market price to ensure the spread can be implied
+    # first ensure recovery rate is positive and at least 10% below the bond market price to ensure the spread can be implied
     recovery_rate = np.clip(recovery_rate, 0, np.subtract(np.divide(price,100), 0.1))
     # makes a first estimate of the yield of the bond using bond price, years to maturity and coupon, then substract interest rate to get spread
     spread_guess = np.subtract(np.divide(np.add(coupon, np.divide(np.subtract(100,price), maturity)/100), np.add(price, 100)/2)*100, interest_rate)
     price_theoretical = 100 * bond_price(maturity,coupon, interest_rate, spread_guess, recovery_rate)
     counter = 0
-    # from starting spread, iterate the calculatio of the spread using a Newton-Raphson method on the bond price
+    # from starting spread, iterate the calculation of the spread using a Newton-Raphson method on the bond price
     while counter < max_number_of_loop and np.max(np.abs(np.subtract(price_theoretical, price))) > 1e-6:
         cr01 = bond_cr01(maturity, coupon, interest_rate, spread_guess, recovery_rate)
         spread_guess = spread_guess + np.divide(np.subtract(price, price_theoretical), cr01) / 10_000
